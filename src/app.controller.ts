@@ -1,12 +1,12 @@
 import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { baseRout } from './app.config';
 
-@Controller()
+@Controller(baseRout)
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor() {}
 
   @Get()
   getHello(): string {
-    return this.appService.getHello();
+    return 'Hello ! This is my test task for Ilink company !';
   }
 }
