@@ -16,7 +16,7 @@ export enum COMMUNITY_THEMATIC {
   TRAVEL = 'TRAVEL',
 }
 
-@Entity()
+@Entity('community')
 export class CommunityEntity {
   // region Plain
   /**

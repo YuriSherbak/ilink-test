@@ -9,7 +9,7 @@ import { UserEntity } from './user.entity';
 import { CommunityEntity } from './community.entity';
 
 /** Сообщества пользователей */
-@Entity()
+@Entity('user-community')
 export class UserCommunityEntity {
   // region Plain
   /** ID */
