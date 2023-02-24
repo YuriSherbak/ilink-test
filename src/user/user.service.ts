@@ -7,6 +7,7 @@ import {
   CommunityEntity,
   UserCommunityEntity,
   FollowEntity,
+  UpdateUserInput,
 } from 'libs/domain';
 
 import { v4 as uuid } from 'uuid';
@@ -45,6 +46,7 @@ export class UserService {
    */
   async createUser(userInput: CreateUserInput): Promise<UserEntity> {
     const user = new UserEntity();
+    user.id = uuid();
     user.nickname = userInput.nickname;
     user.followedBy = [];
     user.following = [];
@@ -55,14 +57,55 @@ export class UserService {
         await this.followUser(user.id, followingUserId);
       }
     }
-    if (userInput.followerIds) {
-      for (const followerUserId of userInput.followerIds) {
-        await this.followUser(followerUserId, user.id);
+    if (userInput?.communityIds) {
+      for (const communityId of userInput.communityIds) {
+        await this.joinCommunity(user.id, communityId);
       }
     }
-    for (const communityId of userInput.communityIds) {
-      await this.joinCommunity(user.id, communityId);
+    return await this.userRepository.findOne({ where: { id: user.id } });
+  }
+
+  /**
+   * Обновляет данные текущего пользователя
+   * @param userId - ID пользователя
+   * @param userInput - данные о пользователе
+   */
+  async updateUser(
+    userId: string,
+    userInput: UpdateUserInput,
+  ): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+    if (!user) throw new Error(`Пользователь с ID ${user.id} не найден.`);
+    if (userInput?.nickname) user.nickname = userInput.nickname;
+    if (userInput?.followingIds) {
+      for (const followingUserId of userInput.followingIds) {
+        await this.followUser(user.id, followingUserId);
+      }
     }
+    if (userInput?.unfollowingIds) {
+      for (const unfollowingId of userInput.unfollowingIds) {
+        const follow = await this.followRepository.findOne({
+          where: {
+            followerId: userId,
+            followingId: unfollowingId,
+          },
+        });
+        await this.followRepository.delete(follow.id);
+      }
+    }
+    if (userInput?.joinCommunityIds) {
+      for (const communityId of userInput.joinCommunityIds) {
+        await this.joinCommunity(user.id, communityId);
+      }
+    }
+    if (userInput?.leaveCommunityIds) {
+      for (const leaveCommunityId of userInput.leaveCommunityIds) {
+        await this.communityRepository.delete(leaveCommunityId);
+      }
+    }
+    await this.userRepository.save(user);
     return await this.userRepository.findOne({ where: { id: user.id } });
   }
 

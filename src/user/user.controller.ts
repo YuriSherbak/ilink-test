@@ -8,7 +8,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { baseRout } from '../app.config';
-import { CreateUserInput, UserEntity } from 'libs/domain';
+import { CreateUserInput, UpdateUserInput, UserEntity } from 'libs/domain';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserService } from './user.service';
 import { Repository } from 'typeorm';
@@ -50,17 +50,19 @@ export class UserController {
    * Обновляет данные пользователя по ID
    */
   @Put('/update/:id')
-  async updateUserById(@Param('id') id: string /*body8*/): Promise<void> {}
+  async updateUserById(
+    @Param('id') id: string,
+    @Body() input: UpdateUserInput,
+  ): Promise<UserEntity> {
+    return await this.userService.updateUser(id, input);
+  }
 
   /**
    * Удаляет пользователя по его ID
    */
   @Delete('/delete/:id')
-  async deleteUserById(@Param('id') id: string): Promise<void> {}
-
-  /**
-   * Удаляет всех пользователей
-   */
-  @Delete('/delete/all')
-  async deleteUsers(): Promise<void> {}
+  async deleteUserById(@Param('id') id: string): Promise<string> {
+    await this.userRepository.delete(id);
+    return `Пользователь с ID ${id} был успешно удален.`;
+  }
 }
