@@ -1,13 +1,8 @@
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { UserCommunityEntity } from './user-community.entity';
+import { FollowEntity } from './follow.entity';
 
-@Entity()
+@Entity('user')
 export class UserEntity {
   // region Plain
   /**
@@ -25,11 +20,6 @@ export class UserEntity {
   // endregion
 
   // regionRelations
-  @OneToMany(() => UserEntity, (user) => user.friend, { nullable: true })
-  friends: UserEntity[];
-
-  @ManyToOne(() => UserEntity, (user) => user.friends, { nullable: true })
-  friend: UserEntity;
 
   /**
    * Связь между сообществами и пользователем, который в них состоит
@@ -40,5 +30,21 @@ export class UserEntity {
     { nullable: true },
   )
   userCommunities?: UserCommunityEntity[];
+
+  /**
+   * Связь между пользователем и другими пользователями, на которых он подписан
+   */
+  @OneToMany(() => FollowEntity, (following) => following.follower, {
+    nullable: true,
+  })
+  following?: FollowEntity[];
+
+  /**
+   * Связь между пользователем и другими пользователями, которые на него подписаны
+   */
+  @OneToMany(() => FollowEntity, (followedBy) => followedBy.following, {
+    nullable: true,
+  })
+  followedBy?: FollowEntity[];
   // endregion
 }
