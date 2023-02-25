@@ -24,9 +24,18 @@ export class UserController {
   /**
    * Возвращает всех пользователей
    */
-  @Get('/all')
+  @Get()
   async users(): Promise<UserEntity[]> {
-    return await this.userRepository.find();
+    return await this.userRepository.find({
+      relations: [
+        'following',
+        'following.following',
+        'followedBy',
+        'followedBy.follower',
+        'userCommunities',
+        'userCommunities.community',
+      ],
+    });
   }
 
   /**
@@ -35,13 +44,23 @@ export class UserController {
    */
   @Get('/:id')
   async getUserById(@Param('id') id: string): Promise<UserEntity> {
-    return await this.userRepository.findOne({ where: { id } });
+    return await this.userRepository.findOne({
+      where: { id },
+      relations: [
+        'following',
+        'following.following',
+        'followedBy',
+        'followedBy.follower',
+        'userCommunities',
+        'userCommunities.community',
+      ],
+    });
   }
 
   /**
    * Добавляет нового пользователя
    */
-  @Post('/add')
+  @Post('/create')
   async createUser(@Body() input: CreateUserInput): Promise<UserEntity> {
     return await this.userService.createUser(input);
   }

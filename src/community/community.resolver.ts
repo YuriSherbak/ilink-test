@@ -1,21 +1,15 @@
+import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Put,
-} from '@nestjs/common';
-import { baseRout } from '../app.config';
+  CommunityEntity,
+  CreateCommunityInput,
+  UpdateCommunityInput,
+} from 'libs/domain';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CommunityEntity } from 'libs/domain';
-import { CreateCommunityInput, UpdateCommunityInput } from 'libs/domain';
 import { CommunityService } from './community.service';
 
-@Controller(`${baseRout}/communities`)
-export class CommunityController {
+@Resolver(() => CommunityEntity)
+export class CommunityResolver {
   constructor(
     @InjectRepository(CommunityEntity)
     private readonly communityRepository: Repository<CommunityEntity>,
@@ -25,7 +19,7 @@ export class CommunityController {
   /**
    * Возвращает все сообщества
    */
-  @Get()
+  @Query(() => [CommunityEntity], { description: 'Возвращает все сообщества' })
   async communities(): Promise<CommunityEntity[]> {
     return await this.communityRepository.find({
       relations: ['userCommunities', 'userCommunities.user'],
@@ -35,10 +29,11 @@ export class CommunityController {
   /**
    * Возвращает сообщество по его ID
    */
-  @Get('/:id')
-  async getCommunityById(@Param('id') id: string): Promise<CommunityEntity> {
+  @Query(() => CommunityEntity, { description: 'Возвращает сообщество по ID' })
+  async getCommunityById(
+    @Args('id', { type: () => ID }) id: string,
+  ): Promise<CommunityEntity> {
     return await this.communityRepository.findOne({
-      where: { id },
       relations: ['userCommunities', 'userCommunities.user'],
     });
   }
@@ -46,9 +41,10 @@ export class CommunityController {
   /**
    * Создает новое сообщество
    */
-  @Post('/create')
+  @Mutation(() => CommunityEntity, { description: 'Создает новое сообщество' })
   async createCommunity(
-    @Body() input: CreateCommunityInput,
+    @Args('input', { type: () => CreateCommunityInput })
+    input: CreateCommunityInput,
   ): Promise<CommunityEntity> {
     return await this.communityService.createCommunity(input);
   }
@@ -56,10 +52,13 @@ export class CommunityController {
   /**
    * Обновляет данные о сообществе по его ID
    */
-  @Put('/update/:id')
+  @Mutation(() => CommunityEntity, {
+    description: 'Обновляет данные о сообществе по его ID',
+  })
   async updateCommunityById(
-    @Param('id') id: string,
-    @Body() input: UpdateCommunityInput,
+    @Args('id', { type: () => ID }) id: string,
+    @Args('input', { type: () => UpdateCommunityInput })
+    input: UpdateCommunityInput,
   ): Promise<CommunityEntity> {
     return await this.communityService.updateCommunity(id, input);
   }
@@ -68,8 +67,10 @@ export class CommunityController {
    * Удаляет сообщество по его ID
    * @param id
    */
-  @Delete('/delete/:id')
-  async deleteCommunityById(@Param('id') id: string): Promise<string> {
+  @Mutation(() => String, { description: 'Удаляет сообщество по его ID' })
+  async deleteCommunityById(
+    @Args('id', { type: () => ID }) id: string,
+  ): Promise<string> {
     await this.communityRepository.delete(id);
     return `Сообщество ${id} было успешно удалено.`;
   }

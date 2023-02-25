@@ -1,0 +1,132 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+"""Сообщество"""
+type CommunityEntity {
+  """ID сообщества"""
+  id: ID!
+
+  """Название сообщества"""
+  name: String!
+
+  """Тематика сообщества"""
+  thematic: CommunityThematic
+
+  """Связи между сообществом и пользователями, которые в нем состоят"""
+  userCommunities: [UserCommunityEntity!]
+}
+
+enum CommunityThematic {
+  MEDICINE
+  FASHION
+  SPORT
+  TRAVEL
+}
+
+"""Связь между пользователем и сообществом"""
+type UserCommunityEntity {
+  """"""
+  id: ID!
+
+  """Пользователь"""
+  user: UserEntity!
+
+  """ID пользователя"""
+  userId: ID!
+
+  """Сообщество"""
+  community: CommunityEntity!
+
+  """ID сообщества"""
+  communityId: ID!
+}
+
+"""Cвязь following-follower между двумя пользователя"""
+type FollowEntity {
+  """ID связи"""
+  id: ID!
+
+  """Пользователь-подписчик"""
+  follower: UserEntity!
+
+  """ID пользователя-подписчика"""
+  followerId: ID!
+
+  """Пользователь, на которого подписан подписчик"""
+  following: UserEntity!
+
+  """ID пользователя, на которого подписан подписчик"""
+  followingId: ID!
+}
+
+"""Пользователь"""
+type UserEntity {
+  """ID пользователя"""
+  id: ID!
+
+  """Никнейм сообщества"""
+  nickname: String!
+
+  """Связь между сообществами и пользователем, который в них состоит"""
+  userCommunities: [UserCommunityEntity!]
+
+  """
+  Связь между пользователем и другими пользователями, на которых он подписан
+  """
+  following: [FollowEntity!]
+
+  """
+  Связь между пользователем и другими пользователями, которые на него подписаны
+  """
+  followedBy: [FollowEntity!]
+}
+
+type Query {
+  """Возвращает всех пользователей"""
+  users: [UserEntity!]!
+
+  """Возвращает пользователя по ID"""
+  getUserById(id: ID!): UserEntity!
+}
+
+type Mutation {
+  """Создает нового пользователя"""
+  createUser(input: CreateUserInput!): UserEntity!
+
+  """Обновляет данные существующего пользователя"""
+  updateUser(id: ID!, input: UpdateUserInput!): UserEntity!
+
+  """Удаляет пользователя по его ID"""
+  deleteUser(id: ID!): String!
+}
+
+"""Данные для создания пользователя"""
+input CreateUserInput {
+  """Никнейм пользователя"""
+  nickname: String!
+
+  """ID пользователей, на которых нужно подписаться"""
+  followingIds: [String!]
+
+  """ID сообществ, в которые хочет вступить пользователь"""
+  communityIds: [String!]
+}
+
+"""Данные для обновления пользователя"""
+input UpdateUserInput {
+  """Никнейм пользователя"""
+  nickname: String
+
+  """Список ID пользователей, на которых надо подписаться"""
+  followingIds: [String!]
+
+  """Список ID пользователей, от которых надо отписаться"""
+  unfollowingIds: [String!]
+
+  """Список ID сообществ, в которые должен вступить пользователь"""
+  joinCommunityIds: [String!]
+
+  """Список ID сообществ, от которых должен отписаться пользователь"""
+  leaveCommunityIds: [String!]
+}

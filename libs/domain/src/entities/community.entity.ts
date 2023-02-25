@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { UserCommunityEntity } from './user-community.entity';
+import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
 
 /**
  * Тематики сообществ
@@ -16,18 +17,25 @@ export enum COMMUNITY_THEMATIC {
   TRAVEL = 'TRAVEL',
 }
 
+registerEnumType(COMMUNITY_THEMATIC, {
+  name: 'CommunityThematic',
+});
+
+@ObjectType({ description: 'Сообщество' })
 @Entity('community')
 export class CommunityEntity {
   // region Plain
   /**
    * ID сообщества
    */
+  @Field(() => ID, { nullable: false, description: 'ID сообщества' })
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   /**
    * Название сообщества
    */
+  @Field(() => String, { nullable: false, description: 'Название сообщества' })
   @Column({ type: 'varchar', nullable: false })
   name: string;
 
@@ -37,6 +45,10 @@ export class CommunityEntity {
   /**
    * Тематика сообщества
    */
+  @Field(() => COMMUNITY_THEMATIC, {
+    nullable: true,
+    description: 'Тематика сообщества',
+  })
   @Column({
     type: 'enum',
     enum: COMMUNITY_THEMATIC,
@@ -48,6 +60,11 @@ export class CommunityEntity {
   // endregion
 
   // region Relations
+  @Field(() => [UserCommunityEntity], {
+    nullable: true,
+    description:
+      'Связи между сообществом и пользователями, которые в нем состоят',
+  })
   /**
    * Связи между сообществом и пользователями, которые в нем состоят
    */
