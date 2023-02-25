@@ -30,15 +30,15 @@ export class CommunityService {
 
   /**
    * Обновляет существующее сообщество
-   * @param userId - ID сообщества
+   * @param communityId - ID сообщества
    * @param input - данные для обновления сообщества
    */
   async updateCommunity(
-    userId: string,
+    communityId: string,
     input: UpdateCommunityInput,
   ): Promise<CommunityEntity> {
     const community = await this.communityRepository.findOne({
-      where: { id: userId },
+      where: { id: communityId },
     });
     community.name = input.name;
     community.thematic = input.thematic;
